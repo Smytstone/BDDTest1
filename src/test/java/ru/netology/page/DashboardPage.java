@@ -1,0 +1,42 @@
+package ru.netology.page;
+
+import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.SelenideElement;
+import lombok.val;
+import ru.netology.data.DataHelper;
+
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.visible;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
+
+public class DashboardPage {
+    // к сожалению, разработчики не дали нам удобного селектора, поэтому так
+    private ElementsCollection cards = $$(".list__item div");
+    private final String balanceStart = "баланс: ";
+    private final String balanceFinish = " р.";
+    private static SelenideElement heading = $("[data-test-id=dashboard]");
+    private static SelenideElement account = $("[data-test-id=dashboard]");
+    private static SelenideElement refreshButton = $("data-test-id=action-reload");
+
+    public DashboardPage() {
+        heading.shouldBe(visible);
+    }
+
+    public int getCardBalance(DataHelper.CardsInfo cardInfo) {
+        String text = cards.findBy(text(cardInfo.getNumber().substring(12, 16))).getText();
+        return extractBalance(text);
+    }
+
+        private int extractBalance (String text) {
+            val start = text.indexOf(balanceStart);
+            val finish = text.indexOf(balanceFinish);
+            val value = text.substring(start + balanceStart.length(), finish);
+            return Integer.parseInt(value);
+        }
+    public MoneyTransfer cardToTransfer(DataHelper.CardsInfo info) {
+        cards.findBy(text(info.getNumber().substring(12, 16))).$("button").click();
+        return new MoneyTransfer();
+    }
+
+}
